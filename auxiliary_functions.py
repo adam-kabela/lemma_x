@@ -4,19 +4,15 @@ from itertools import combinations
 
 starting_time = time.time()
 
-def induces_no_multiedges(M, S):
-    subM = M.subgraph(S)
-    return len(subM.multiple_edges()) == 0
-
 def line_graph_of_multigraph(M): # no such function in sage, so...
     E = list(M.edges(labels=False))
-    L = graphs.CompleteGraph(len(E)).complement() # graph with right number of vertices but no edges
+    L = graphs.CompleteGraph(len(E)).complement() # graph with the right number of vertices but no edges
     for u in range(len(E) - 1):
         for v in range(u+1, len(E)):
             if len(set(E[u]).union(set(E[v]))) <= 3: # common vertex in preimage
                 L.add_edge(u,v) # adjacent in line graph
     return L
-
+"""
 # finding an (induced) submultigraph of a multigraph
 # the only function I found is isomorphic_substructures_iterator documentation at
 # http://www2.math.ritsumei.ac.jp/doc/static/reference/combinat/sage/combinat/designs/subhypergraph_search.html
@@ -26,9 +22,10 @@ def is_subgraph_of_multigraph(subgraph_searched, host_multigraph):
     for dummy in H.isomorphic_substructures_iterator(S, induced=True):
         return True
     return False  # empty iterator means no subgraph
+"""
 
 #induced subgraph of multigraph except the host graph may have extra multiplicities
-def is_subgraph_of_multigraph_induced_in_simple(subgraph_searched, host_multigraph):
+def has_flat_subgraph(subgraph_searched, host_multigraph):
     S = copy(subgraph_searched)
     S = S.to_simple()
     H = copy(host_multigraph)
@@ -49,6 +46,14 @@ def is_subgraph_of_multigraph_induced_in_simple(subgraph_searched, host_multigra
             return True
     return False
 
+def has_multiedge(M, e):
+    if e in M.multiple_edges(labels=False):
+        return True
+    if (e[1], e[0]) in M.multiple_edges(labels=False):
+        return True
+    return False
+
+"""
 def has_twin(M, N): # twin incident with no multiedge
     G = copy(M)
     G = G.to_simple()
@@ -63,6 +68,7 @@ def has_twin(M, N): # twin incident with no multiedge
                 if is_twin:
                     return True # N gives a twin of v (same neighbourhoods)
     return False
+"""
 
 def number_of_twins(M, N): # twin incident with no multiedge
     G = copy(M)
@@ -98,13 +104,13 @@ def get_nontrivial_components(M):
 def get_pairs(L):
     return list(combinations(L, 2)) 
 
-def edges_without_diplicities(M):
+def simple_non_pendant_edges(M):
     output = []
-    G = copy(M)
-    G = G.to_simple()
-    for e in G.edges(labels=False): # give only one edge of each multiedge
-        output.append(e)
-    return output
+    for e in M.edges(labels=False):
+        if M.degree(e[0]) > 1 and M.degree(e[1]) > 1: #e is not pendant
+            if e not in M.multiple_edges(labels=False): #e is simple
+                output.append(e)
+    return output            
 
 def cyclic_relabeling(C): # relabel vertices of Hamiltonian graph so that it has cycle 0,1,...,n-1
     output = [0]*C.order()
