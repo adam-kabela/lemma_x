@@ -4,7 +4,7 @@ from itertools import combinations
 
 starting_time = time.time()
 
-def line_graph_of_multigraph(M): # no such function in sage, so...
+def line_graph_of_multigraph(M): # no such function in sage, so we implement it here
     E = list(M.edges(labels=False))
     L = graphs.CompleteGraph(len(E)).complement() # graph with the right number of vertices but no edges
     for u in range(len(E) - 1):
@@ -12,20 +12,9 @@ def line_graph_of_multigraph(M): # no such function in sage, so...
             if len(set(E[u]).union(set(E[v]))) <= 3: # common vertex in preimage
                 L.add_edge(u,v) # adjacent in line graph
     return L
-"""
-# finding an (induced) submultigraph of a multigraph
-# the only function I found is isomorphic_substructures_iterator documentation at
-# http://www2.math.ritsumei.ac.jp/doc/static/reference/combinat/sage/combinat/designs/subhypergraph_search.html
-def is_subgraph_of_multigraph(subgraph_searched, host_multigraph):
-    S = IncidenceStructure(subgraph_searched.edges())
-    H = IncidenceStructure(host_multigraph.edges())
-    for dummy in H.isomorphic_substructures_iterator(S, induced=True):
-        return True
-    return False  # empty iterator means no subgraph
-"""
 
-#induced subgraph of multigraph except the host graph may have extra multiplicities
-def has_flat_subgraph(subgraph_searched, host_multigraph):
+#subgraph of multigraph obtained by removing some vertices and replacing some mutiedges with simple edges 
+def has_flat_subgraph(host_multigraph, subgraph_searched):
     S = copy(subgraph_searched)
     S = S.to_simple()
     H = copy(host_multigraph)
@@ -34,15 +23,16 @@ def has_flat_subgraph(subgraph_searched, host_multigraph):
         multiedges_ok = True
         #each mulitedge of subgraph_searched must be a multiedge in host_multigraph
         for e in subgraph_searched.multiple_edges(labels=False):
-            u, v = I[e[0]], I[e[1]] #e mapped to vertices u,v 
-            if u < v:
-                e_host = (u,v)
-            else:
-                e_host = (v, u)
-            if e_host not in host_multigraph.multiple_edges(labels=False):
+            if has_multiedge(host_multigraph, (I[e[0]], I[e[1]])) == False:
                 multiedges_ok = False
                 break
         if multiedges_ok:
+            return True
+    return False
+
+def at_least_one_is_multiedge(M, E):
+    for e in E:
+        if has_multiedge(M, e):
             return True
     return False
 
@@ -53,37 +43,16 @@ def has_multiedge(M, e):
         return True
     return False
 
-"""
-def has_twin(M, N): # twin incident with no multiedge
-    G = copy(M)
-    G = G.to_simple()
-    for v in G.vertices():
-        if G.degree(v) == M.degree(v): # v is incident with no multiedge
-            if G.degree(v) == sum(N): # same degrees
-                is_twin = True
-                for u in G.neighbors(v):
-                    if N[u] == 0:
-                        is_twin = False # N does not give a twin of v
-                        break
-                if is_twin:
-                    return True # N gives a twin of v (same neighbourhoods)
-    return False
-"""
-
-def number_of_twins(M, N): # twin incident with no multiedge
+def number_of_pendant_twins(M, N):
+    if sum(N) > 1:
+        return
     G = copy(M)
     G = G.to_simple()
     number_of_twins = 0
-    for v in G.vertices():
-        if G.degree(v) == M.degree(v): # v is incident with no multiedge
-            if G.degree(v) == sum(N): # same degrees
-                is_twin = True
-                for u in G.neighbors(v):
-                    if N[u] == 0:
-                        is_twin = False # N does not give a twin of v
-                        break
-                if is_twin:
-                    number_of_twins += 1 # N gives a twin of v (same neighbourhoods)
+    n = N.index(1)
+    for u in G.neighbors(n):
+        if G.degree(u) == 1:
+            number_of_twins += 1
     return number_of_twins
 
 def has_subgraph(host_graph, subgraph):
@@ -108,7 +77,7 @@ def simple_non_pendant_edges(M):
     output = []
     for e in M.edges(labels=False):
         if M.degree(e[0]) > 1 and M.degree(e[1]) > 1: #e is not pendant
-            if e not in M.multiple_edges(labels=False): #e is simple
+            if has_multiedge(M, e) == False: #e is simple
                 output.append(e)
     return output            
 
@@ -129,6 +98,7 @@ def random_but_probability_tweaked(n): # so that smaller numbers appear more oft
 
 def get_runtime():
     return round(time.time() - starting_time, 3)
-
+"""
 def min_degree(M):
     return min([M.degree(v) for v in M.vertices()])
+"""

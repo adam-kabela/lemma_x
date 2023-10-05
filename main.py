@@ -1,6 +1,7 @@
 from manage_cases import *
 
 def investigate(MaE, case, previously_solved_cases):
+    update_extensions(MaE)
     choice = choose_problem_and_get_all_solution_attempts(MaE, case)  
     solved_cases = copy(previously_solved_cases)
     investigated_extensions = []
@@ -16,19 +17,17 @@ def investigate(MaE, case, previously_solved_cases):
 
 # run #########################################################################
 log_intro()
-solved_cases = []
-for k in range(7, 11):
+for k in range(7, 11):    
+    solved_cases = []
     starting_graphs = get_starting_graphs(k)
     case = str(k - 6)
     log_case(case, k, len(starting_graphs))     
     for i in range(len(starting_graphs)):
-        C = starting_graphs[i]
-        L = get_all_non_empty_neighbourhoods(k)
-        MaE = Multigraph_and_Extensions(C, L, C.edges(labels=False))
-        update_extensions(MaE)
+        G = starting_graphs[i]
+        MaE = Multigraph_and_Extensions(G, get_all_non_empty_neighbourhoods(k), G.edges(labels=False), k)
         subcase = "subcase " + case + "." + str(i+1)
-        log_subcase(subcase, MaE.multigraph, "")
-        investigate(MaE, subcase, solved_cases) #TODO send copy?
-        solved_cases.append([C, subcase])
+        log_subcase(subcase, G, "")
+        investigate(MaE, subcase, solved_cases)
+        solved_cases.append([G, subcase])
         print_and_log_proof(subcase, "finished, total runtime is", get_runtime(), "seconds.")
         

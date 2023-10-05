@@ -1,33 +1,34 @@
 from fix_properties import *
 
 class Multigraph_and_Extensions:
-  def __init__(self, multigraph, additions, multiplications):
+  def __init__(self, multigraph, additions, multiplications, length):
     self.multigraph = multigraph
     self.additions = additions # possible additions of a new vertex while connected
     self.multiplications = multiplications # simple edges possibly extendable to multiedges
+    self.length = length # length of the starting cycle
 
 def extend(MaE, extension, investigated_extensions):
     # discard investigated_extensions since they lead to cases already solved
-    non_investigated_neighbourhoods = []
-    for N in MaE.additions:
-        if N not in investigated_extensions:
-            non_investigated_neighbourhoods.append(N)
-    non_investigated_multiedges = []
+    non_investigated_additions = []
+    for A in MaE.additions:
+        if A not in investigated_extensions:
+            non_investigated_additions.append(A)
+    non_investigated_multiplications = []
     for e in MaE.multiplications:
         if e not in investigated_extensions:
-            non_investigated_multiedges.append(e)
-    # apply extension on multigraph
+            if e != extension: # each edge can be mutiplied at most once
+                non_investigated_multiplications.append(e)
+    # apply extension to multigraph
     if isinstance(extension, list): # new vertex
         newM = add_vertex_by_neighbourhood(MaE.multigraph, extension)
-        newM_neighbourhoods = extend_list_of_neighbourhoods(non_investigated_neighbourhoods)
-        newM_multiedges = non_investigated_multiedges + additional_edges(newM.order() - 1, extension)
+        newM_additions = extend_list_of_neighbourhoods(non_investigated_additions)
+        newM_multiplications = non_investigated_multiplications + additional_edges(newM.order() - 1, extension)
     else: #new multiedge
         newM = copy(MaE.multigraph)
         newM.add_edge(extension)
-        newM_neighbourhoods = non_investigated_neighbourhoods
-        newM_multiedges = non_investigated_multiedges
-    newMaE = Multigraph_and_Extensions(newM, newM_neighbourhoods, newM_multiedges)
-    update_extensions(newMaE)
+        newM_additions = non_investigated_additions
+        newM_multiplications = non_investigated_multiplications
+    newMaE = Multigraph_and_Extensions(newM, newM_additions, newM_multiplications, MaE.length)
     return newMaE 
 
 def additional_edges(extra_vertex, N):
@@ -44,7 +45,8 @@ def add_vertex_by_neighbourhood(M, N):
     Mprime.add_edges(additional_edges(extra_vertex, N))
     return Mprime
 
-def extend_list_of_neighbourhoods(L): # possible vertex extensions while connected
+# all possible vertex additions while connected
+def extend_list_of_neighbourhoods(L): 
     just_to_new_vertex = [0]*len(L[0]) + [1]
     output = [just_to_new_vertex]
     for N in L:
@@ -54,23 +56,22 @@ def extend_list_of_neighbourhoods(L): # possible vertex extensions while connect
 
 def discard_bad_additions(MaE):
     result = []
-    for N in MaE.additions:
-        Mprime = add_vertex_by_neighbourhood(MaE.multigraph, N)
-        if contains_D_or_Gamma3_or_CM9(Mprime) == False: # TODO two functions testing this?
-            result.append(N)
+    for A in MaE.additions:
+        Mprime = add_vertex_by_neighbourhood(MaE.multigraph, A)
+        if multigraph_is_ok(Mprime, MaE.length):
+            result.append(A)
     MaE.additions = result
 
 def discard_bad_multiplications(MaE):
     result = []
     for e in MaE.multiplications:
         Mprime = copy(MaE.multigraph)
-        if e not in Mprime.multiple_edges(labels=False):
-            Mprime.add_edge(e)
-            if contains_D_or_Gamma3_or_CM9(Mprime) == False:
-                result.append(e)
+        Mprime.add_edge(e)
+        if multigraph_is_ok(Mprime, MaE.length):
+            result.append(e)
     MaE.multiplications = result          
 
 def update_extensions(MaE):
-    log_proof("Discarding all extensions that give diamond or Gamma_3 or C^M_9:") # TODO
+    log_proof("Discarding all extensions that give diamond or Gamma_3 or C^M_9 or solved shorter cycle.")
     discard_bad_additions(MaE)
     discard_bad_multiplications(MaE)
