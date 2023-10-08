@@ -1,4 +1,5 @@
 from auxiliary_functions import *
+from printing import *
 
 D = graphs.DiamondGraph() # diamond a.k.a. K_4 minus one edge
 Gamma3 = graphs.PathGraph(6)
@@ -17,16 +18,27 @@ KM4_P4.add_edges([(0,2),(0,3),(0,4),(0,5),(2,6),(3,7),(4,8),(5,9),(1,6),(1,7),(1
 
 # there should be no diamond in M and no induced Gamma3 in L(M)
 # and no flat fubgraph CM9 in M and no solved shorter cycle in M 
-def multigraph_is_ok(M, n): 
-    if contains_D(M):
-        return False # M contains diamond subgraph (not necessarily induced)
-    if contains_Gamma3(M):
-        return False # L(M) contains induced Gamma3
-    if contains_CM9(M):
-        return False # M contains CM9 as a flat subgraph
-    if contains_solved_cycle(M, n):
-        return False # contains shorter cycle which is already solved
-    return True
+def multigraph_is_ok(M, n, printing, extension):
+    message = ""
+    if extension is not None:
+        message = "\t " + attempts_as_string([extension], [0]) + " "
+    is_ok = False
+    if contains_D(M): # M contains D as a subgraph
+        message += "would create D as a subgraph,"
+    elif contains_Gamma3(M): # L(M) contains induced Gamma3
+        message += "would create Gamma_3 as an induced subgraph in the line graph,"
+    elif contains_CM9(M): # M contains CM9 as a flat subgraph
+        message += "would create C^M_9 as a flat subgraph,"
+    elif contains_solved_cycle(M, n):
+        message += "would create shorter solved cycle as a subgraph,"
+    else:
+        is_ok = True
+        message += "is ok"
+    if is_ok == False:
+        message += " this extension is discarded"
+    if printing:
+        log_proof(message)
+    return is_ok
 
 def contains_D(M): 
     G = copy(M)
@@ -35,13 +47,11 @@ def contains_D(M):
     
 def contains_Gamma3(M): 
     L = line_graph_of_multigraph(M)
-    if L.subgraph_search(Gamma3, induced=True) == None:
-        return False
-    return True
-
+    return (L.subgraph_search(Gamma3, induced=True) is not None)
+        
 def contains_CM9(M):
     return has_flat_subgraph(M, CM9)
-
+       
 def contains_solved_cycle(M, n): 
     G = copy(M)
     G = G.to_simple() #simple graph G for M
@@ -52,10 +62,10 @@ def contains_solved_cycle(M, n):
 
 # there should be at least 10 vertices of degree at least 3
 def investigate_degrees(M):
-    degree_1_and_2 = [v for v in M.vertices() if M.degree(v) <= 2]
-    if M.order() - len(degree_1_and_2) >= 10: # there are enough vertices of degree at least 3
+    degree_at_least_3 = [v for v in M.vertices() if M.degree(v) >= 3]
+    if len(degree_at_least_3) >= 10: # there are enough vertices of degree at least 3
         return []
-    return [[degree_1_and_2, []]]
+    return [[degree_at_least_3, []]]
 
 # each 2-edge-cut should form at most one nontrivial component        
 def investigate_2_edge_cuts(M):

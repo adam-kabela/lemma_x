@@ -11,7 +11,7 @@ def get_starting_graphs(n):
         return [C10, C10plusChord, C10plusTwoChords] #only three graphs of order 10 contain C_10 and none of C_9, C_8, C_7 
     output = []
     for G in graphs(n): # test all graphs on n vertices
-        if multigraph_is_ok(G, n): # check if graph should be investigated 
+        if multigraph_is_ok(G, n, False, None): # check if graph should be investigated, and do not print
             if has_subgraph(G, graphs.CycleGraph(n)):
                 G.relabel(cyclic_relabeling(G.subgraph_search(graphs.CycleGraph(n), induced=False)))
                 G.allow_multiple_edges(True)

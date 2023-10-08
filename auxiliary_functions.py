@@ -98,7 +98,3 @@ def random_but_probability_tweaked(n): # so that smaller numbers appear more oft
 
 def get_runtime():
     return round(time.time() - starting_time, 3)
-"""
-def min_degree(M):
-    return min([M.degree(v) for v in M.vertices()])
-"""

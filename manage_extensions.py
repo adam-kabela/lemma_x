@@ -58,7 +58,7 @@ def discard_bad_additions(MaE):
     result = []
     for A in MaE.additions:
         Mprime = add_vertex_by_neighbourhood(MaE.multigraph, A)
-        if multigraph_is_ok(Mprime, MaE.length):
+        if multigraph_is_ok(Mprime, MaE.length, True, A): # check if multigraph is ok, and print 
             result.append(A)
     MaE.additions = result
 
@@ -67,11 +67,11 @@ def discard_bad_multiplications(MaE):
     for e in MaE.multiplications:
         Mprime = copy(MaE.multigraph)
         Mprime.add_edge(e)
-        if multigraph_is_ok(Mprime, MaE.length):
+        if multigraph_is_ok(Mprime, MaE.length, True, e): # check if multigraph is ok, and print
             result.append(e)
     MaE.multiplications = result          
 
 def update_extensions(MaE):
-    log_proof("Discarding all extensions that give diamond or Gamma_3 or C^M_9 or solved shorter cycle.")
+    log_proof("Checking all non-investigated extensions, and discarding extensions that give D or Gamma_3 or C^M_9 or solved shorter cycle:")
     discard_bad_additions(MaE)
     discard_bad_multiplications(MaE)

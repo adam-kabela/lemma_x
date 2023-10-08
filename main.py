@@ -25,7 +25,7 @@ for k in range(7, 11):
     for i in range(len(starting_graphs)):
         G = starting_graphs[i]
         MaE = Multigraph_and_Extensions(G, get_all_non_empty_neighbourhoods(k), G.edges(labels=False), k)
-        subcase = "subcase " + case + "." + str(i+1)
+        subcase = "Subcase " + case + "." + str(i+1)
         log_subcase(subcase, G, "")
         investigate(MaE, subcase, solved_cases)
         solved_cases.append([G, subcase])

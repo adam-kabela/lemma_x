@@ -1,5 +1,4 @@
 from investigate_properties import *
-from printing import *
 
 # get all violation of properties for multigraph M         
 def get_all_problems(M):
@@ -16,6 +15,7 @@ def get_all_problems(M):
 
 def choose_problem_and_get_all_solution_attempts(MaE, case):
     # extensions
+    log_proof("Considering all problems and all non-investigated applicable extensions.")
     applicable_additions = get_all_applicable_additions(MaE)
     applicable_multiplications = get_all_applicable_multiplications(MaE)
     applicable_extensions = applicable_additions + applicable_multiplications
@@ -24,20 +24,22 @@ def choose_problem_and_get_all_solution_attempts(MaE, case):
     all_problems = get_all_problems(M)
     short_list = minimal_problems_and_solution_attempts(all_problems, M, applicable_additions, applicable_multiplications)
     if len(short_list) == 0: # no property is violated
-        print_and_log_family("#", case)
-        print_and_log_family("F.append(", M.edges(labels = False), ")")
-        log_proof("There is no problem, cannot force particular extensions, so we test all non-investigated extensions.")
+        log_proof("There is no problem.")
+        print_and_log_family("# In", case + ",", "a new member of F is added.")
+        print_and_log_family("F += [", M.edges(labels = False), "]")
+        log_proof("Branch over all applicable extensions:")
+        log_proof("\t", attempts_as_string(applicable_extensions, list(range(len(applicable_extensions)))))
         return applicable_extensions 
     if len(short_list[0][1]) == 0: # zero possible solution attempts
         log_proof("There is a problem which cannot be solved:")
         log_problem(short_list[0][0])
-        log_proof("Tried all non-investigated extension with a poterntial to solve this. None of them works. Case closed.")
+        log_proof("Tried all non-investigated extension with a potential to solve this. None of them works. Subcase closed.")
         return []
     C = short_list[random_but_probability_tweaked(len(short_list))]
-    log_proof("Choose problem at random:")
+    log_proof("Choose a problem at random:")
     log_problem(C[0])
-    log_proof("Branch over all relevant solution attempts:")
-    log_proof(attempts_as_string(applicable_extensions, C[1]))
+    log_proof("Branch over all solution attempts relevant to the problem:")
+    log_proof("\t", attempts_as_string(applicable_extensions, C[1]))
     return [applicable_extensions[i] for i in C[1]]
 
 # we choose just problems whose set of solution attempts is inclusion minimal
@@ -69,6 +71,7 @@ def get_all_applicable_additions(MaE):
 
 def get_all_applicable_multiplications(MaE):
     output = []
+    non_applicable = []
     for e in MaE.multiplications:
         if MaE.multigraph.degree(e[0]) > 1 and MaE.multigraph.degree(e[1]) > 1: #edge is non-pendant, and hence can be multiplied
             output.append(e)
