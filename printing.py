@@ -1,9 +1,9 @@
 import logging
 
-proof = logging.FileHandler("output/proof.txt", mode="w")
+proof = logging.FileHandler("computer_generated_proof/proof.txt", mode="w")
 #proof.terminator = ""
 proof.setLevel(logging.INFO)
-family = logging.FileHandler("output/F.py", mode="w")
+family = logging.FileHandler("family_F_and_hamiltonian_connectedness/F.py", mode="w")
 family.setLevel(logging.WARNING)
 logging.basicConfig(handlers=[proof, family], format='%(message)s', encoding='utf-8', level=logging.INFO, force=True)
 
