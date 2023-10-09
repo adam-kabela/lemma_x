@@ -1,5 +1,5 @@
 /gitignore
 /.gitignore
 /__pycache__
-/family_F_and_hamiltonian_connectedness/test_Hamilton_connectedness.py
-/family_F_and_hamiltonian_connectedness/verifier.py
+/family_F_and_hamiltonian_connectedness/hamiltonian_connectedness_certificate.py
+/family_F_and_hamiltonian_connectedness/__pycache__
