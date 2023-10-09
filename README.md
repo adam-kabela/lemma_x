@@ -6,19 +6,23 @@ For details, see https://drive.google.com/file/d/1PqqV7z4ZNwXpxpn05da9gLBavgSXLY
 
 ## Usage
 
+### Prove lemma
+
 run main.py
 
 The algorithm generates:
 - plaintext full proof of the lemma in computer_generated_proof/proof.txt 
 - the list of all multigraphs which satisfy the conditions of the lemma in family_F_and_hamiltonian_connectedness/F.py
 
+### Hamiltonian-connectedness
+
 run family_F_and_hamiltonian_connectedness/find_hamiltonian_paths.py (it uses F.py)
 
-For each multigraph from F, a line graph is created. In the line graph, Hamiltonian paths between all pairs of vertices are found and listed in hamiltonian_connectedness_certificate.py
+For each multigraph from F, its line graph is created. In the line graph, Hamiltonian paths between all pairs of vertices are found and listed in hamiltonian_connectedness_certificate.py
 
 run family_F_and_hamiltonian_connectedness/verify_certificate.py (it uses hamiltonian_connectedness_certificate.py)
 
-It verifies the Hamiltonian connectedness by checking all listed paths. Verification is much faster than finding Hamiltonian paths (the related problem is NP-complete). 
+It verifies the Hamiltonian connectedness by checking all listed paths. The verification suffices to prove that the graphs are Hamiltonian-connected, and is much faster than finding Hamiltonian paths (the related problem is NP-complete). 
 
 
 ## Prerequisites
