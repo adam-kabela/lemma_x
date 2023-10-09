@@ -8,6 +8,8 @@ family.setLevel(logging.WARNING)
 logging.basicConfig(handlers=[proof, family], format='%(message)s', encoding='utf-8', level=logging.INFO, force=True)
 
 def attempts_as_string(extensions, indices):
+    if len(indices) == 0:
+        return "There is no applicable extension. Subcase closed."
     output = ""
     do_vertex_line = True
     do_edge_line = True
